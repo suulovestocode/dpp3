@@ -1,13 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     var sceneEl = document.querySelector('a-scene');
-    var cameraEntity = sceneEl.querySelector('[camera]');
     var houseModel = document.getElementById('house-model');
     var videoElement = document.getElementById('ar-video');
     var videoControls = document.getElementById('video-controls');
     var video = document.getElementById('video');
     var raycaster = new THREE.Raycaster();
     var mouse = new THREE.Vector2();
+    var cameraEntity = sceneEl.querySelector('[camera]');
     var camera = cameraEntity.getObject3D('camera');
+    var marker = document.querySelector('a-marker');
 
     // Function to update the raycaster with the current mouse position
     function onMouseMove(event) {
@@ -42,6 +43,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Attach the handleClick function to the window's click event
     window.addEventListener('click', handleClick, false);
+
+    // Function to handle marker found event
+    marker.addEventListener('markerFound', function() {
+        console.log('Marker found!');
+        video.play();
+    });
+
+    // Function to handle marker lost event
+    marker.addEventListener('markerLost', function() {
+        console.log('Marker lost!');
+        video.pause();
+    });
 });
 
 function playVideo() {
