@@ -1,15 +1,16 @@
 document.addEventListener('DOMContentLoaded', function() {
     var sceneEl = document.querySelector('a-scene');
-    var cameraEntity = sceneEl.querySelector('a-camera');
-
-    // Initialize raycaster and projector
+    var cameraEntity = sceneEl.querySelector('[camera]');
+    var houseModel = document.getElementById('house-model');
+    var videoElement = document.getElementById('ar-video');
+    var videoControls = document.getElementById('video-controls');
+    var video = document.getElementById('video');
     var raycaster = new THREE.Raycaster();
-    var projector = new THREE.Projector();
-    var camera = cameraEntity.object; // Get the Three.js camera from the A-Frame camera entity
+    var mouse = new THREE.Vector2();
+    var camera = cameraEntity.getObject3D('camera');
 
     // Function to update the raycaster with the current mouse position
     function onMouseMove(event) {
-        // Normalize mouse pos to [-1, 1] range
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     }
@@ -19,28 +20,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to handle click events
     function handleClick(event) {
-        // Convert the mouse position to normalized device coordinates
-        // (-1 to +1 for both components)
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
 
-        // Update the picking ray with the camera and mouse position
-        var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
-        projector.unprojectVector(vector, camera);
-
-        // Calculate objects intersecting the picking ray
-        var intersects = projector.pick(mouse.x, mouse.y);
+        var intersects = raycaster.intersectObjects(sceneEl.object3D.children, true);
 
         if (intersects.length > 0) {
             var object = intersects[0].object;
 
-            // Check if the clicked object is the 3D model
-            if (object.id === 'house-model') {
+            if (object.el && object.el.id === 'house-model') {
                 console.log('3D Model clicked!');
-                // Here you can show a text popup or any other action
-            } else if (object.id === 'ar-video') {
+                var cube = document.createElement('a-box');
+                cube.setAttribute('position', '0 0.5 0');
+                cube.setAttribute('material', 'color: pink');
+                houseModel.appendChild(cube);
+            } else if (object.el && object.el.id === 'ar-video') {
                 console.log('Video clicked!');
-                // Here you can control the video playback or any other action
+                videoControls.style.display = 'block';
             }
         }
     }
@@ -48,3 +43,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Attach the handleClick function to the window's click event
     window.addEventListener('click', handleClick, false);
 });
+
+function playVideo() {
+    var video = document.getElementById('video');
+    video.play();
+}
+
+function pauseVideo() {
+    var video = document.getElementById('video');
+    video.pause();
+}
